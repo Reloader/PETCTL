@@ -1,6 +1,9 @@
-// Reloader electro
-
-
+//#define _LCD_1602_ // Использование экрана 1602 I2C
+#if defined(_LCD_1602_)
+  #define _LCD_1602_adress_ 0x3F // адрес экрана на шине
+#endif
+//#define _activ_beeper_ // использование зуммера со встроенным генератором
+//====================================================
 /*   Stepper driver microstep devision */
 #define CFG_STEP_DIV 8
 /* Which pin stepper driver STEP pin connected */

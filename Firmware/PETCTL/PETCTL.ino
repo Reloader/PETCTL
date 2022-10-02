@@ -7,8 +7,14 @@ GStepper<STEPPER2WIRE> stepper(200 * CFG_STEP_DIV, CFG_STEP_STEP_PIN, CFG_STEP_D
 
 #include "GyverTimers.h"
 
+#if defined(_LCD_1602_)
+#include "Wire.h"
+#include "LiquidCrystal_I2C.h"
+#include "LiquidCrystal_sybbols.h"
+#else
 #include "GyverOLED.h"
 GyverOLED<SSD1306_128x64, OLED_NO_BUFFER> oled;
+#endif
 
 #define CLK CFG_ENC_CLK
 #define DT CFG_ENC_DT
