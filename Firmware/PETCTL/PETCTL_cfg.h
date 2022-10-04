@@ -1,25 +1,30 @@
-//#define _LCD_1602_ // Использование экрана 1602 I2C
-#if defined(_LCD_1602_)
-  #define _LCD_1602_adress_ 0x3F // адрес экрана на шине
-#endif
+#define _setEncReverse_ // Инвертирование энкодера (изменение направления)
+#define _encSetHoldTimeout_ 300     // установить время удержания кнопки энкодера, мс (до 8 000)
 //#define _activ_beeper_ // использование зуммера со встроенным генератором
 //====================================================
 /*   Stepper driver microstep devision */
-#define CFG_STEP_DIV 8
+//#define CFG_STEP_DIV 8
+#define CFG_STEP_DIV 16
 /* Which pin stepper driver STEP pin connected */
-#define CFG_STEP_STEP_PIN 6
+//#define CFG_STEP_STEP_PIN 6
+#define CFG_STEP_STEP_PIN 2
 /* Which pin stepper driver DIR pin connected */
-#define CFG_STEP_DIR_PIN 5
+//#define CFG_STEP_DIR_PIN 5
+#define CFG_STEP_DIR_PIN 3
 /* Which pin stepper driver EN pin connected */
-#define CFG_STEP_EN_PIN 7
+//#define CFG_STEP_EN_PIN 7
+#define CFG_STEP_EN_PIN 10
 /* Invert stepper rotation direction (comment out to disable invertion)*/
 #define CFG_STEP_INVERT 
 /* Which pin encoder CLK pin connected */
-#define CFG_ENC_CLK 3
+//#define CFG_ENC_CLK 3
+#define CFG_ENC_CLK 4
 /* Which pin encoder DT pin connected */
-#define CFG_ENC_DT 2
+//#define CFG_ENC_DT 2
+#define CFG_ENC_DT 11
 /* Which pin encoder SW pin connected */
-#define CFG_ENC_SW 4
+//#define CFG_ENC_SW 4
+#define CFG_ENC_SW 9
 /* Type of encoder: TYPE1 or TYPE2 */
 #define CFG_ENC_TYPE TYPE2
 /* Initial target temperature [degree C]*/
@@ -37,20 +42,24 @@
 /* The beta coefficient of the thermistor (usually 3000-4000) */
 #define CFG_TERM_B_COEFF 4388
 /* the value of the 'other' resistor [Om] */
-#define CFG_TERM_SERIAL_R 4700
+//#define CFG_TERM_SERIAL_R 4700
+#define CFG_TERM_SERIAL_R 10000
 /* Which pin endstop connected to */
-#define CFG_ENDSTOP_PIN 8
+//#define CFG_ENDSTOP_PIN 8
+#define CFG_ENDSTOP_PIN 7
 /* Extra length to pull after end stop triggered [m] */
 #define CFG_PULL_EXTRA_LENGTH 0.07
 /* Which pin emergency endstop connected to */
-#define CFG_EMENDSTOP_PIN 11
+//#define CFG_EMENDSTOP_PIN 11
+#define CFG_EMENDSTOP_PIN 7
 /* PID regulator coefficients */
 //PID p: 12.69  PID i: 0.71 PID d: 57.11
 #define CFG_PID_P 12.69
 #define CFG_PID_I 0.71
 #define CFG_PID_D 57.11
 /* Which pin heater MOSFET connected to */
-#define CFG_HEATER_PIN 9
+//#define CFG_HEATER_PIN 9
+#define CFG_HEATER_PIN 5
 /* Target filament bobin diameter [mm] */
 #define CFG_BOBIN_DIAM 74
 /* Initial pull speed [mm/s] */
