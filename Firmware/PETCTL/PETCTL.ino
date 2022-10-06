@@ -1,20 +1,17 @@
 //  =========== ДОПИЛИТЬ =============
-// 1) процедура вывода на экран
-// 2) кнопки и энкодер подключить через EncButton
-// (https://github.com/GyverLibs/EncButtonhttps://github.com/GyverLibs/EncButton)
-
+// 1) контроль автостопа
 
 
 #include "PETCTL_cfg.h"
 #define SPEED_MAX 10
 
 #define DRIVER_STEP_TIME 6  // меняем задержку на 6 мкс
-#include "GyverStepper.h"
+#include "src/GyverStepper.h"
 GStepper<STEPPER2WIRE> stepper(200 * CFG_STEP_DIV, CFG_STEP_STEP_PIN, CFG_STEP_DIR_PIN, CFG_STEP_EN_PIN);
 
-#include "GyverTimers.h"
+#include "src/GyverTimers.h"
 
-#include "EncButton.h"
+#include "src/EncButton.h"
 EncButton<EB_TICK, CFG_ENC_CLK, CFG_ENC_DT, CFG_ENC_SW> enc;  // энкодер управления
 
 EncButton<EB_TICK, CFG_ENDSTOP_PIN> endstop;        // концевик остановкипо окончанию прутка
@@ -26,7 +23,7 @@ float targetTemp = CFG_TEMP_INIT;
 
 float finalLength = 0;
 
-#include "GyverPID.h"
+#include "src/GyverPID.h"
 GyverPID regulator(CFG_PID_P, CFG_PID_I, CFG_PID_D, 200);
 
 
@@ -74,9 +71,6 @@ uint32_t ssp;         // переменная таймера
 // Выбор экрана для вывода изображения (нужное раскоментировать)
 #include "LCD_1602_i2c.h" // Использование LCD 1602 I2C
 
-// в отдельный файл
-//#include "GyverOLED.h"
-//GyverOLED<SSD1306_128x64, OLED_NO_BUFFER> oled;
 
 // ==== Прототипы для компилятора =====
 void encRotationToValue (long* value, int inc = 1, long minValue = 0, long maxValue = 0);
@@ -145,17 +139,10 @@ void setup() {
 // ======================
 // обработчик
 ISR(TIMER2_A) {
-  //enc1.tick();
   stepper.tick(); // тикаем тут
-  //enc.tick();
-  //endstop.tick();
 }
 
-// ======================
-void yield() {
-  // костыль, на всякий случай.
-  stepper.tick();
-}
+
 
 // ======= !!!! =========
 void loop() {
@@ -239,7 +226,6 @@ void loop() {
   if (newTargetTemp != targetTemp) {
     targetTemp = newTargetTemp;
     regulator.setpoint = targetTemp;
-    //printTargetTemp(newTargetTemp);
   }
 
 
@@ -445,18 +431,10 @@ void emStop(int reason) {
   stepper.disable();
   Heat = false;
   analogWrite(CFG_HEATER_PIN, 0);
-  //  oled.clear();
-  //  oled.setScale(3);
-  //  oled.setCursorXY(0, 2);
-  //  oled.println("*HALT!*");
-  //  oled.setScale(2);
-  //  oled.setCursorXY(3, 40);
   switch (reason) {
     case OVERHEAT:
-      //oled.println("Overheat");
       break;
     case THERMISTOR_ERROR:
-      //oled.println("Thermistor");
       break;
   }
   for (;;) {
@@ -478,18 +456,12 @@ void motorCTL(long setSpeedX10) {
   Serial.print(stepper.getCurrent());
   Serial.print(",\t");
 #endif // SERIAL_DEBUG_STEPPER
-  //  oled.setScale(2);
-  //  oled.setCursorXY(0, 23);
-
   if (setSpeedX10 > 0) {
     stepper.setSpeedDeg(mmStoDeg((float)setSpeedX10 / 10), SMOOTH);      // [degree/sec]
-    //oled.println("*");
   } else if (setSpeedX10 == 0) {
     stepper.stop();
-    //oled.println(".");
   } else {
     stepper.brake();
-    //oled.println(".");
   }
 
 #if defined(SERIAL_DEBUG_STEPPER)

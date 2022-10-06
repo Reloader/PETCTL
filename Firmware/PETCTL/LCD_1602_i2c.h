@@ -1,15 +1,17 @@
+// connecting screen 1602 with i2c module
 // подключение экрана 1602 с i2c модулем
 #define _LCD_1602_adress_ 0x3F // адрес экрана на шине
 
 
 #include "Wire.h"
-#include "LiquidCrystal_I2C.h"
-#include "LiquidCrystal_sybbols.h"
+#include "src/LiquidCrystal_I2C.h"
 LiquidCrystal_I2C lcd(_LCD_1602_adress_, 16, 2);
 
-// дополнительные символы для экрана 1602
+// additional symbols for the screen 1602
+// Дополнительные символы для экрана
 void add_Symbols(){
-  // Закладка на будущее
+  // for the future
+  // на будущее
 }
 
 void screen_Init(){
@@ -30,15 +32,17 @@ void screen_clear(){
   lcd.clear(); 
 }
 
+// процедура выводит на экран всю информацию
+// displays all the information
+void showscreen() { 
 
-void showscreen() { // процедура выводит на экран всю информацию
-
-float tmpspeed = (float)SpeedX10 / 10; // скоросто мотора
-float tmpMilage = stepper.getCurrentDeg()*REDCONST; // пробег
+float tmpspeed = (float)SpeedX10 / 10; // motor speed
+float tmpMilage = stepper.getCurrentDeg()*REDCONST; // Milage
 
     lcd.setCursor (0, 0); 
 
     // вывод символа наличие/отсутствие нагрева
+    // display of the symbol presence / absence of heating
     if (Heat){
         lcd.print(char(42));
     }else{
@@ -46,6 +50,7 @@ float tmpMilage = stepper.getCurrentDeg()*REDCONST; // пробег
     }
 
     // вывод символа отметки управления температурой
+    // temperature control label symbol output
     if (MenuMode == MENU_MODE_TEMP){
       lcd.print(char(126));   
     }else{
@@ -53,13 +58,16 @@ float tmpMilage = stepper.getCurrentDeg()*REDCONST; // пробег
     }
 
     // вывод текущей температуры
+    // output of the current temperature
     lcd.print(curTemp, 0); 
     if(curTemp<10) lcd.print(" ");
     if(curTemp<100) lcd.print(" ");
 
     lcd.setCursor (5, 0);
     lcd.print("<");
-    
+
+    // Вывод целевой температуры
+    // Target temperature output
     lcd.setCursor (6, 0); 
     lcd.print(targetTemp, 0); 
     if(targetTemp<10) lcd.print(" ");
@@ -67,6 +75,7 @@ float tmpMilage = stepper.getCurrentDeg()*REDCONST; // пробег
 
 
     // управление нагрузкой 
+    // load management
     lcd.setCursor (10, 0);
     if (MenuMode == MENU_MODE_LOAD){
       lcd.print(char(126));   
@@ -83,6 +92,7 @@ float tmpMilage = stepper.getCurrentDeg()*REDCONST; // пробег
 
     
     // индикация вращения мотора
+    // motor rotation indication
     lcd.setCursor (0, 1); 
     if (runMotor==true){
         lcd.print(char(42));
@@ -91,6 +101,7 @@ float tmpMilage = stepper.getCurrentDeg()*REDCONST; // пробег
     }
 
     // вывод символа отметки управления мотором
+    // motor control mark symbol output
     if (MenuMode == MENU_MODE_MOTOR){
       lcd.print(char(126));   
     }else{
@@ -98,7 +109,7 @@ float tmpMilage = stepper.getCurrentDeg()*REDCONST; // пробег
     }
 
     // Установленная скорость мотора 
-    
+    // current motor speed
     if (tmpspeed<10){
       lcd.print(tmpspeed, 1);
     }else{
@@ -106,9 +117,8 @@ float tmpMilage = stepper.getCurrentDeg()*REDCONST; // пробег
       lcd.print(" ");  
     }
 
-    //lcd.print(" mm/s");
-
-
+    // отображение пробега
+    // show mileage
     lcd.setCursor (11, 1);
     lcd.print(tmpMilage,2);
 }
