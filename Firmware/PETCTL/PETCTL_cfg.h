@@ -70,12 +70,12 @@
 /* the value of the 'other' resistor [Om] */
 //#define CFG_TERM_SERIAL_R 4700
 #define CFG_TERM_SERIAL_R 10000
-/* Which pin endstop connected to */
+/* Which pin endstop connected to  Датчик ленты*/ 
 //#define CFG_ENDSTOP_PIN 8
 #define CFG_ENDSTOP_PIN 7
 /* Extra length to pull after end stop triggered [m] */
 #define CFG_PULL_EXTRA_LENGTH 0.07
-/* Which pin emergency endstop connected to */
+/* Which pin emergency endstop connected to  Датчик прутка*/
 //#define CFG_EMENDSTOP_PIN 11
 #define CFG_EMENDSTOP_PIN 7
 /* PID regulator coefficients */

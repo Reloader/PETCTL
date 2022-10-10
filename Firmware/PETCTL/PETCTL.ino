@@ -3,7 +3,7 @@
 
 
 #include "PETCTL_cfg.h"
-#define SPEED_MAX 10
+#define SPEED_MAX 15
 
 #define DRIVER_STEP_TIME 6  // меняем задержку на 6 мкс
 #include "src/GyverStepper.h"
@@ -52,17 +52,20 @@ boolean loadEnable = false;
 #define MENU_MODE_MOTOR 2
 #define MENU_MODE_LOAD 3
 
-int MenuMode = MENU_MODE_TEMP;
+int MenuMode = MENU_MODE_NO;
 
-
-int whatToChange = MENU_MODE_TEMP;
 unsigned long interactive = millis();
 
 /* Emergency stop reasons */
+// возможные причины ошибки
 #define OVERHEAT 1
 #define THERMISTOR_ERROR 2
+#define ENDSTOP_FILAMENT 3
+#define ENDSTOP_TAPE 4
 
+int ErrorStatus = 0; // Статус ошибки. Если 0 то это нормальная работа
 
+int motor_icon = 0; // Номер символа иконки вращения мотора
 
 #define ShowScreen_period 300  // период в мс
 uint32_t ssp;         // переменная таймера
@@ -101,6 +104,8 @@ void setup() {
   pinMode(CFG_SOUND_PIN, OUTPUT);
   pinMode(CFG_ENC_SW, INPUT_PULLUP);
 
+  pinMode(CFG_ENDSTOP_PIN, INPUT_PULLUP);
+  pinMode(CFG_EMENDSTOP_PIN, INPUT_PULLUP);
 
   stepper.setRunMode(KEEP_SPEED);   // режим поддержания скорости
 #if defined(CFG_STEP_INVERT)
@@ -151,12 +156,14 @@ void loop() {
 
   curTemp = getTemp();
   regulator.input = curTemp; // сообщаем регулятору текущую температуру
-//  if (Heat == true) {
-//    regulator.setpoint = targetTemp;
-//  }
+
   if (millis() - ssp >= ShowScreen_period) {  // ищем разницу
     ssp = millis();                   // сброс таймера
     showscreen(); // Вывод информации на экран
+
+    // анимация вращения мотора
+    motor_icon++;
+    if (motor_icon > 3) motor_icon = 0;
   }
 
 
@@ -183,7 +190,7 @@ void loop() {
         if (Heat == true) {
           regulator.setpoint = targetTemp;
         } //else {
-          //regulator.setpoint = 0;
+        //regulator.setpoint = 0;
         //}
         break;
       case 2:
@@ -192,6 +199,8 @@ void loop() {
         if (runMotor) {
           motorCTL(SpeedX10);
         } else {
+          // Если была стаботка датчика ленты то при остановке двигателя отключаем его
+          if (ErrorStatus == ENDSTOP_TAPE) ErrorStatus = 0;
           motorCTL(-1);
         }
         break;
@@ -239,78 +248,38 @@ void loop() {
   }
 
 
+  // Обработка ошибок
+  // Датчик ленты
+    if ((ErrorStatus != ENDSTOP_TAPE) && (digitalRead(CFG_ENDSTOP_PIN) == LOW) && (runMotor)) {
+      ErrorStatus = ENDSTOP_TAPE;
+      // понизить скорость вращения в 2 раза (!)
+      SpeedX10 = SpeedX10 / 2;
+      // звeковое сопровождение
+      beepI();
+    }
+
+  // датчик прутка
+  if ((ErrorStatus != ENDSTOP_FILAMENT) && ((digitalRead(CFG_EMENDSTOP_PIN) == LOW))) {
+    // остановить нагрев
+    // остановить двигатель
+    // звуковое сопровождение
+
+  }
+
+  //// возможные причины ошибки
+  //#define OVERHEAT 1
+  //#define THERMISTOR_ERROR 2
+  //#define ENDSTOP_FILAMENT 3
+  //#define ENDSTOP_TAPE 4
+  //
+  //int ErrorStatus = 0; // Статус ошибки. Если 0 то это нормальная работа
+
+
+
+
 
   // ==== старая логика ======
-  //    if (enc1.isDouble()) { // режим изменение скорости
-  //      whatToChange = CHANGE_SPEED;
-  //      interactiveSet();
-  //      printTargetTemp(targetTemp); // to clear selection
-  //      printSpeed(SpeedX10);
-  //    }
-  //    if (enc1.isSingle()) { // режим изменение температуры
-  //      whatToChange = CHANGE_TEMPERATURE;
-  //      interactiveSet();
-  //      printSpeed(SpeedX10); // to clear selection
-  //      printTargetTemp(targetTemp);
-  //    }
-  //    if (!isInteractive()) { // просто вывод на экран
-  //      whatToChange = CHANGE_NO;
-  //      printSpeed(SpeedX10); // to clear selection
-  //      printTargetTemp(targetTemp);
-  //    }
-  //
-  //    if( whatToChange == CHANGE_TEMPERATURE) {
-  //      encRotationToValue(&newTargetTemp, 1, CFG_TEMP_MIN, CFG_TEMP_MAX - 10);
-  //      if (enc1.isHolded()){
-  //        Heat = ! Heat;
-  //        printHeaterStatus(Heat);
-  //      }
-  //
-  //      if (newTargetTemp != targetTemp) {
-  //        targetTemp = newTargetTemp;
-  //        regulator.setpoint = newTargetTemp;
-  //        printTargetTemp(newTargetTemp);
-  //      }
-  //    } else if (whatToChange == CHANGE_SPEED) {
-  //      encRotationToValue(&newSpeedX10, 1, 0, SPEED_MAX * 10);
-  //      if (enc1.isHolded()) {
-  //        runMotor = ! runMotor;
-  //        if (runMotor) {
-  //          motorCTL(newSpeedX10);
-  //        } else {
-  //          motorCTL(-1);
-  //          runMotor = false;
-  //        }
-  //        interactiveSet();
-  //      }
-  //      if (newSpeedX10 != SpeedX10) {
-  //        SpeedX10 = newSpeedX10;
-  //        if (runMotor) motorCTL(newSpeedX10);        // в градусах/сек
-  //        printSpeed(newSpeedX10);
-  //      }
-  //    }
-  //    if (runMotor) {
-  //      printMilage(stepper.getCurrentDeg());
-  //    }
-  //
-  //    curTemp = getTemp();
-  //    stepper.tick();
-  //    if (curTemp > CFG_TEMP_MAX - 10) emStop(OVERHEAT);
-  //    if (curTemp < -10) emStop(THERMISTOR_ERROR);
-  //    regulator.input = curTemp;
-  //    if (curTemp != prevTemp) {
-  //      prevTemp = curTemp;
-  //      printCurrentTemp(curTemp);
-  //    }
-  //    if (Heat) {
-  //      int pidOut = (int) constrain(regulator.getResultTimer(), 0, 255);
-  //      analogWrite(CFG_HEATER_PIN, pidOut);
-  //      debugTemp(curTemp, pidOut);
-  //    } else {
-  //      analogWrite(CFG_HEATER_PIN, 0);
-  //      debugTemp(curTemp, 0);
-  //    }
-  //
+
   //    oled.setCursorXY(90, 47);
   //    if(!digitalRead(CFG_ENDSTOP_PIN)) {
   //      if(!runMotor) {
@@ -360,27 +329,7 @@ void loop() {
   //      oled.println(" ");
   //    }
 }
-//======================================
-// void encoder_handler(){
-//      //#define MENU_MODE_TEMP 1
-//    //#define MENU_MODE_MOTOR 2
-//  if (enc.left()) {
-//    if (MenuMode == MENU_MODE_TEMP){
-//
-//    } else if (MenuMode==MENU_MODE_MOTOR) {
-//
-//    }
-//    //Serial.println("left");     // поворот налево
-//  }
-//  if (enc.right()) {
-//    if (MenuMode == MENU_MODE_TEMP){
-//
-//    } else if (MenuMode==MENU_MODE_MOTOR) {
-//
-//    }
-//    //Serial.println("right");   // поворот направо
-//  }
-// }
+
 //======================================
 void debugTemp(float temp, int out) {
 #if defined(SERIAL_DEBUG_TEMP)
@@ -475,13 +424,6 @@ void motorCTL(long setSpeedX10) {
 
 }
 
-void printHeaterStatus(boolean status) {
-  //  oled.setCursorXY(0, 0);
-  //  if (status)
-  //    oled.println("*");
-  //  else
-  //    oled.println(".");
-}
 
 void encRotationToValue (long* value, int inc = 1, long minValue = 0, long maxValue = 0) {
 
@@ -502,40 +444,7 @@ void encRotationToValue (long* value, int inc = 1, long minValue = 0, long maxVa
   if (*value > maxValue) *value = maxValue;
 }
 
-void printTargetTemp(float t) {
-  //  oled.setScale(2);
-  //  if (whatToChange == CHANGE_TEMPERATURE)  oled.invertText(true);
-  //  oled.setCursorXY(88, 0);
-  //  oled.println((int)t, 1);
-  //  oled.invertText(false);
-}
 
-void printCurrentTemp(float t) {
-  //  oled.setScale(2);
-  //  oled.setCursorXY(12, 0);
-  //  oled.print(t, 1);
-  //  if (t < 99.9) oled.print(" "); //clean screen garbage
-  //  if (t < 9.9) oled.print(" ");
-}
-
-void printSpeed(long s) { // вывод скорости на экран
-  //  // s -speed in mm/s * 10
-  //  // // pint in mm/s
-  //  oled.setScale(2);
-  //  oled.setCursorXY(12, 23);
-  //  if (whatToChange == CHANGE_SPEED)  oled.invertText(true);
-  //  oled.print((float)s / 10, 1);
-  //  if (s < 100) oled.print(" "); //fix display garbage
-  //  oled.invertText(false);
-}
-
-void printMilage(float m) { // вывод пробега на экран
-  //  // m - current stepper position in degree
-  //  // output to display in meters
-  //  oled.setScale(2);
-  //  oled.setCursorXY(12, 47);
-  //  oled.println(m * REDCONST);
-}
 
 void interactiveSet() {
   interactive = millis() + 15000;
