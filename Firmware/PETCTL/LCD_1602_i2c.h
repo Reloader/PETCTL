@@ -1,13 +1,3 @@
-/*
-    Если ErrorStatus = 0 То всё работает в штатном порядке
-    Если ErrorStatus = ENDSTOP_TAPE  Изменить иконку работы двигателя
-    Если ErrorStatus = ENDSTOP_FILAMENT  - ничего не делаем - иконки изменятся
-    автоматически так как будет остановлен двигатель и нагрев
-    Если ErrorStatus = OVERHEAT То выводить ошибку о перегреве
-    Если ErrorStatus = THERMISTOR_ERROR выводить сообщение об ошибке термистора
-*/
-
-
 
 // connecting screen 1602 with i2c module
 // подключение экрана 1602 с i2c модулем
@@ -73,45 +63,50 @@ void screen_clear() {
 
 // процедура вывода анимации активности пункта
 void activeItem() {
-
-  switch (motor_icon) {
-    case 0:
-      lcd.print(char(2));
-      break;
-    case 1:
-      lcd.print(char(2));
-      break;
-    case 2:
-      lcd.print(char(3));
-      break;
-    case 3:
-      lcd.print(char(3));
-      break;
-    default:
-      lcd.print(char(42));
+  if (ErrorStatus == ENDSTOP_FILAMENT) {
+    lcd.print("X");
+  } else {
+    switch (motor_icon) {
+      case 0:
+        lcd.print(char(2));
+        break;
+      case 1:
+        lcd.print(char(2));
+        break;
+      case 2:
+        lcd.print(char(3));
+        break;
+      case 3:
+        lcd.print(char(3));
+        break;
+      default:
+        lcd.print(char(42));
+    }
   }
-  //lcd.print(char(2));
 }
 
 
 // Процедура выводит символ для анимации движения мотора
 void motorSymbol() {
-  // Обрыв ленты - 4 lcd.print(char(4));
-  switch (motor_icon) {
-    case 0:
-      lcd.print(char(4));
-      break;
-    case 1:
-      lcd.print(char(4));
-      break;
-    case 2:
-      lcd.print(" ");
-      break;
-    case 3:
-      lcd.print(" ");
-      break;
-    default:
-      lcd.print(char(42));
+  if (ErrorStatus == ENDSTOP_FILAMENT) {
+    lcd.print("X");
+  } else {
+    switch (motor_icon) {
+      case 0:
+        lcd.print(char(4));
+        break;
+      case 1:
+        lcd.print(char(4));
+        break;
+      case 2:
+        lcd.print(" ");
+        break;
+      case 3:
+        lcd.print(" ");
+        break;
+      default:
+        lcd.print(char(42));
+    }
   }
 }
 
@@ -141,7 +136,7 @@ void showscreen() {
 
     // вывод символа наличие/отсутствие нагрева
     // display of the symbol presence / absence of heating
-    if (Heat) {
+    if (Heat || ErrorStatus == ENDSTOP_TAPE || ErrorStatus == ENDSTOP_FILAMENT) {
       //lcd.print(char(42));
       activeItem();
     } else {
@@ -152,7 +147,6 @@ void showscreen() {
     // вывод символа отметки управления температурой
     // temperature control label symbol output
     if (MenuMode == MENU_MODE_TEMP) {
-      //lcd.print(char(126));
       lcd.print(char(0));
     } else {
       lcd.print(" ");
@@ -185,16 +179,13 @@ void showscreen() {
     } else {
       lcd.print(" ");
     }
-    //lcd.print("Load");
-
+    
     lcd.print(char(5));
     lcd.print(" ");
 
-    if (loadEnable == true) {
+    if (loadEnable == true || ErrorStatus == ENDSTOP_TAPE || ErrorStatus == ENDSTOP_FILAMENT) {
       activeItem();
-      //lcd.print(char(42));
     } else {
-      //lcd.print(char(46));
       lcd.print(char(1));
     }
 
@@ -202,8 +193,7 @@ void showscreen() {
     // индикация вращения мотора
     // motor rotation indication
     lcd.setCursor (0, 1);
-    if (runMotor) {
-      //motorSymbol();
+    if (runMotor || ErrorStatus == ENDSTOP_TAPE || ErrorStatus == ENDSTOP_FILAMENT) {
       if (ErrorStatus == ENDSTOP_TAPE) {
         // вывод символа окончания ленты
         motorSymbol();
@@ -211,7 +201,7 @@ void showscreen() {
         activeItem();
       }
     } else {
-      //lcd.print(char(46));
+      
       lcd.print(char(1));
     }
 
@@ -241,5 +231,5 @@ void showscreen() {
     }
     lcd.print(tmpMilage, 2);
     lcd.print("m");
-  }
+  }  
 }

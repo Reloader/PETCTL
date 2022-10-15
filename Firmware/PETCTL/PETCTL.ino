@@ -179,7 +179,12 @@ void loop() {
   if (enc.click()) {
     interactiveSet();
     MenuMode++;
-    if (MenuMode > 3) MenuMode = 1;
+    if (MenuMode > 3) MenuMode = 1; 
+
+    if((ErrorStatus == ENDSTOP_FILAMENT) && digitalRead(CFG_EMENDSTOP_PIN) != LOW ){
+        ErrorStatus = 0;
+    }
+    
   }
 
   if (enc.held()) {
@@ -250,27 +255,56 @@ void loop() {
 
   // Обработка ошибок
   // Датчик ленты
-    if ((ErrorStatus != ENDSTOP_TAPE) && (digitalRead(CFG_ENDSTOP_PIN) == LOW) && (runMotor)) {
-      ErrorStatus = ENDSTOP_TAPE;
-      // понизить скорость вращения в 2 раза (!)
-      SpeedX10 = SpeedX10 / 2;
-      // звeковое сопровождение
-      beepI();
-    }
+  if ((ErrorStatus != ENDSTOP_TAPE) && (digitalRead(CFG_ENDSTOP_PIN) == LOW) && (runMotor)) {
+    ErrorStatus = ENDSTOP_TAPE;
+    // понизить скорость вращения в 2 раза (!)
+    SpeedX10 = SpeedX10 / 2;
+    // звуковое сопровождение
+    beepI();
+  }
 
   // датчик прутка
-  if ((ErrorStatus != ENDSTOP_FILAMENT) && ((digitalRead(CFG_EMENDSTOP_PIN) == LOW))) {
-    // остановить нагрев
-    // остановить двигатель
-    // звуковое сопровождение
-
+  if (digitalRead(CFG_EMENDSTOP_PIN) == LOW) {
+    ErrorStatus = ENDSTOP_FILAMENT;
+    if (runMotor && Heat) {
+      // Звуковое сопровождение
+      beepI();
+      beepI();
+    }
+    runMotor = false;
+    motorCTL(-1);
+    Heat = false;
+    loadEnable = false;
   }
+//  else{
+//    ErrorStatus = 0;
+//  }
+
 
   //// возможные причины ошибки
   //#define OVERHEAT 1
   //#define THERMISTOR_ERROR 2
   //#define ENDSTOP_FILAMENT 3
   //#define ENDSTOP_TAPE 4
+
+  if (curTemp > CFG_TEMP_MAX - 10) {
+    ErrorStatus = OVERHEAT;
+    runMotor = false;
+    motorCTL(-1);
+    Heat = false;
+    loadEnable = false;
+  }
+  if (curTemp < -10) {
+    ErrorStatus = THERMISTOR_ERROR;
+    runMotor = false;
+    motorCTL(-1);
+    Heat = false;
+    loadEnable = false;
+  }
+
+
+
+
   //
   //int ErrorStatus = 0; // Статус ошибки. Если 0 то это нормальная работа
 
