@@ -107,6 +107,12 @@ void setup() {
   pinMode(CFG_ENDSTOP_PIN, INPUT_PULLUP);
   pinMode(CFG_EMENDSTOP_PIN, INPUT_PULLUP);
 
+  #if defined(_externalLoad_)
+    pinMode(externalLoadPin, OUTPUT);  
+  #endif
+  
+  // externalLoadPin
+
   stepper.setRunMode(KEEP_SPEED);   // режим поддержания скорости
 #if defined(CFG_STEP_INVERT)
   stepper.reverse(true);            // reverse direction
@@ -179,7 +185,12 @@ void loop() {
   if (enc.click()) {
     interactiveSet();
     MenuMode++;
-    if (MenuMode > 3) MenuMode = 1; 
+    #if defined(_externalLoad_)
+      if (MenuMode > 3) MenuMode = 1;
+    #else
+      if (MenuMode > 2) MenuMode = 1;
+    #endif
+     
 
     if((ErrorStatus == ENDSTOP_FILAMENT) && digitalRead(CFG_EMENDSTOP_PIN) != LOW ){
         ErrorStatus = 0;
@@ -210,6 +221,8 @@ void loop() {
         }
         break;
       case 3:
+      
+ 
         // включение/выключение дополнительного чего-нибудь
         loadEnable = !loadEnable;
         break;
@@ -301,6 +314,14 @@ void loop() {
     Heat = false;
     loadEnable = false;
   }
+
+  #if defined(_externalLoad_)
+    if(loadEnable == false){
+    digitalWrite(externalLoadPin, LOW);
+    }else{
+     digitalWrite(externalLoadPin, HIGH); 
+    } 
+  #endif
 
 
 

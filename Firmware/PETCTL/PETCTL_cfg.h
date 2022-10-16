@@ -1,5 +1,6 @@
 #define _setEncReverse_ // Инвертирование энкодера (изменение направления)
 #define _encSetHoldTimeout_ 300     // установить время удержания кнопки энкодера, мс (до 8 000)
+#define _externalLoad_  //использование внешнего управляемого устройства
 //#define _activ_beeper_ // использование зуммера со встроенным генератором
 //====================================================
 /*
@@ -95,6 +96,9 @@
 /* Enable startup sound (comment to disable).
    Special for GEORGIY (@nehilo011) :) */
 #define CFG_SOUND_START
+
+// пин дополнительной внешней нагрузки
+#define externalLoadPin 16
 /* 
  *  Chouse reductor type. 
  * Only one CFG_RED_RA, CFG_RED_PP1 or CFG_RED_PP2 can be uncomment

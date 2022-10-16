@@ -169,7 +169,7 @@ void showscreen() {
     if (targetTemp < 10) lcd.print(" ");
     if (targetTemp < 100) lcd.print(" ");
 
-
+    #if defined(_externalLoad_)
     // управление нагрузкой
     // load management
     lcd.setCursor (12, 0);
@@ -188,7 +188,7 @@ void showscreen() {
     } else {
       lcd.print(char(1));
     }
-
+    #endif
 
     // индикация вращения мотора
     // motor rotation indication
