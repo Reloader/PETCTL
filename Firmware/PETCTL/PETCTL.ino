@@ -322,67 +322,6 @@ void loop() {
      digitalWrite(externalLoadPin, HIGH); 
     } 
   #endif
-
-
-
-
-  //
-  //int ErrorStatus = 0; // Статус ошибки. Если 0 то это нормальная работа
-
-
-
-
-
-  // ==== старая логика ======
-
-  //    oled.setCursorXY(90, 47);
-  //    if(!digitalRead(CFG_ENDSTOP_PIN)) {
-  //      if(!runMotor) {
-  //        oled.setScale(2);
-  //        oled.println("  *");
-  //      } else {
-  //        if (finalLength > 0){
-  //          rest = finalLength - getMilage();
-  //          if (rest >= 0) {
-  //            oled.setScale(1);
-  //            oled.setCursorXY(90, 55);
-  //            oled.println(rest*100,1); // rest in cm
-  //            oled.setScale(2);
-  //          } else {
-  //            runMotor = false;
-  //            motorCTL(0);
-  //            Heat = false;
-  //            printHeaterStatus(Heat);
-  //            finalLength = 0;
-  //            beepI();
-  //          }
-  //        } else {
-  //          finalLength = getMilage() + CFG_PULL_EXTRA_LENGTH;
-  //        }
-  //      }
-  //    } else {
-  //      oled.setScale(2);
-  //      oled.println("   ");
-  //      finalLength = 0;
-  //    }
-  //
-  //    oled.setCursorXY(112, 24);
-  //    if(!digitalRead(CFG_EMENDSTOP_PIN)) {
-  //      if(!runMotor) {
-  //        oled.setScale(2);
-  //        oled.println("X");
-  //      } else {
-  //        runMotor = false;
-  //        motorCTL(-1);
-  //        Heat = false;
-  //        printHeaterStatus(Heat);
-  //        beepI();
-  //        beepI();
-  //       }
-  //    } else {
-  //      oled.setScale(2);
-  //      oled.println(" ");
-  //    }
 }
 
 //======================================
