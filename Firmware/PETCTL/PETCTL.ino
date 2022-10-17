@@ -1,7 +1,11 @@
 //  =========== ДОПИЛИТЬ =============
-// 1) контроль автостопа
+// 1) Получение температуры перестроить на библиотеку термистора
+// из примера в GyverPID :
+// https://github.com/GyverLibs/GyverPID/tree/main/examples/autotune2/thermistor-pwm/pid_autotune
+// 2) чтение/сохранение коэффициентов PID регулятора в EEPROM
+// 3) Встроить автокалибровку регуоятора
 
-
+#include <EEPROM.h>
 #include "PETCTL_cfg.h"
 #define SPEED_MAX 15
 
@@ -483,3 +487,12 @@ float simpleKalman(float newVal) {
   _last_estimate = _current_estimate;
   return _current_estimate;
 }
+
+
+// ==========================================
+
+// чтение настроек
+
+// запись настроек
+
+// автокалибровка PID
