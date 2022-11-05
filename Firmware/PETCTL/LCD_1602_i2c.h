@@ -36,7 +36,8 @@ void add_Symbols() {
   lcd.createChar(4, customChar4);
 
   // Символ исполнительного устройства
-  byte customChar5[8] = { 28, 2, 1, 5, 9, 30, 8, 4};
+  //byte customChar5[8] = { 28, 2, 1, 5, 9, 30, 8, 4};
+  byte customChar5[8] = { 0, 14, 21, 31, 21, 14, 0};
   lcd.createChar(5, customChar5);
 
 
@@ -121,11 +122,14 @@ void showscreen() {
     lcd.print("   -= ERROR =-");
     lcd.setCursor (0, 1);
 
-    if (ErrorStatus == OVERHEAT) {
-      lcd.print(" -= OVERHEAT =-");
-    } else {
-      lcd.print("THERMISTOR ERROR");
-    }
+//    if (ErrorStatus == OVERHEAT) {
+//      lcd.print(" -= OVERHEAT =-");
+//    } else {
+//      lcd.print("THERMISTOR ERROR");
+//    }
+
+    lcd.print(curTemp, 0);
+
 
   } else {
 

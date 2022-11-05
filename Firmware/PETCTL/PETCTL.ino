@@ -1,13 +1,16 @@
 //  =========== ДОПИЛИТЬ =============
-// 1) Получение температуры перестроить на библиотеку термистора
-// из примера в GyverPID :
-// https://github.com/GyverLibs/GyverPID/tree/main/examples/autotune2/thermistor-pwm/pid_autotune
-// 2) чтение/сохранение коэффициентов PID регулятора в EEPROM
-// 3) Встроить автокалибровку регуоятора
+// 1) чтение/сохранение коэффициентов PID регулятора в EEPROM
+// 2) Встроить автокалибровку регулятора
 
 #include <EEPROM.h>
-#include "PETCTL_cfg.h"
+//#include "PETCTL_cfg.h"
+#include "PETCTL_HW02.h"
 #define SPEED_MAX 15
+
+#define eeAddress_P 0
+#define eeAddress_I (eeAddress_P+sizeof(float))
+#define eeAddress_D (eeAddress_I+sizeof(float))
+
 
 #define DRIVER_STEP_TIME 6  // меняем задержку на 6 мкс
 #include "src/GyverStepper.h"
@@ -24,8 +27,9 @@ int value = 0;
 // Termistor definition
 float prevTemp, curTemp = 0;
 float targetTemp = CFG_TEMP_INIT;
-
 float finalLength = 0;
+
+
 
 #include "src/GyverPID.h"
 GyverPID regulator(CFG_PID_P, CFG_PID_I, CFG_PID_D, 200);
@@ -78,6 +82,8 @@ uint32_t ssp;         // переменная таймера
 // Выбор экрана для вывода изображения (нужное раскоментировать)
 #include "LCD_1602_i2c.h" // Использование LCD 1602 I2C
 
+int tempenable = 0; // костыль. Нужен для того чтобы фильтр термистора не ронял в ошибку пр истарте
+
 
 // ==== Прототипы для компилятора =====
 void encRotationToValue (long* value, int inc = 1, long minValue = 0, long maxValue = 0);
@@ -87,7 +93,7 @@ float getTemp();
 void interactiveSet();
 boolean isInteractive();
 void motorCTL(long setSpeedX10);
-void debugTemp(float temp, int out);
+//void debugTemp(float temp, int out);
 //=====================================
 
 void setup() {
@@ -111,10 +117,10 @@ void setup() {
   pinMode(CFG_ENDSTOP_PIN, INPUT_PULLUP);
   pinMode(CFG_EMENDSTOP_PIN, INPUT_PULLUP);
 
-  #if defined(_externalLoad_)
-    pinMode(externalLoadPin, OUTPUT);  
-  #endif
-  
+#if defined(_externalLoad_)
+  pinMode(externalLoadPin, OUTPUT);
+#endif
+
   // externalLoadPin
 
   stepper.setRunMode(KEEP_SPEED);   // режим поддержания скорости
@@ -174,7 +180,11 @@ void loop() {
     // анимация вращения мотора
     motor_icon++;
     if (motor_icon > 3) motor_icon = 0;
+
+    tempenable = tempenable + 1;
   }
+
+  if (tempenable > 4000) tempenable = 4000;
 
 
   long newTargetTemp = targetTemp;
@@ -189,17 +199,17 @@ void loop() {
   if (enc.click()) {
     interactiveSet();
     MenuMode++;
-    #if defined(_externalLoad_)
-      if (MenuMode > 3) MenuMode = 1;
-    #else
-      if (MenuMode > 2) MenuMode = 1;
-    #endif
-     
+#if defined(_externalLoad_)
+    if (MenuMode > 3) MenuMode = 1;
+#else
+    if (MenuMode > 2) MenuMode = 1;
+#endif
 
-    if((ErrorStatus == ENDSTOP_FILAMENT) && digitalRead(CFG_EMENDSTOP_PIN) != LOW ){
-        ErrorStatus = 0;
+
+    if ((ErrorStatus == ENDSTOP_FILAMENT) && digitalRead(CFG_EMENDSTOP_PIN) != LOW ) {
+      ErrorStatus = 0;
     }
-    
+
   }
 
   if (enc.held()) {
@@ -209,9 +219,7 @@ void loop() {
         Heat = !Heat;
         if (Heat == true) {
           regulator.setpoint = targetTemp;
-        } //else {
-        //regulator.setpoint = 0;
-        //}
+        }
         break;
       case 2:
         //Включание/выключение мотора
@@ -225,8 +233,8 @@ void loop() {
         }
         break;
       case 3:
-      
- 
+
+
         // включение/выключение дополнительного чего-нибудь
         loadEnable = !loadEnable;
         break;
@@ -263,22 +271,22 @@ void loop() {
   if (Heat == true) {
     int pidOut = regulator.getResultTimer();
     analogWrite(CFG_HEATER_PIN, pidOut);
-    debugTemp(curTemp, pidOut);
+    //debugTemp(curTemp, pidOut);
   } else {
     analogWrite(CFG_HEATER_PIN, 0);
-    debugTemp(curTemp, 0);
+    //debugTemp(curTemp, 0);
   }
 
 
   // Обработка ошибок
-  // Датчик ленты
-  if ((ErrorStatus != ENDSTOP_TAPE) && (digitalRead(CFG_ENDSTOP_PIN) == LOW) && (runMotor)) {
-    ErrorStatus = ENDSTOP_TAPE;
-    // понизить скорость вращения в 2 раза (!)
-    SpeedX10 = SpeedX10 / 2;
-    // звуковое сопровождение
-    beepI();
-  }
+  // Датчик ленты пока отключен
+  //  if ((ErrorStatus != ENDSTOP_TAPE) && (digitalRead(CFG_ENDSTOP_PIN) == LOW) && (runMotor)) {
+  //    ErrorStatus = ENDSTOP_TAPE;
+  //    // понизить скорость вращения в 2 раза (!)
+  //    SpeedX10 = SpeedX10 / 2;
+  //    // звуковое сопровождение
+  //    beepI();
+  //  }
 
   // датчик прутка
   if (digitalRead(CFG_EMENDSTOP_PIN) == LOW) {
@@ -293,9 +301,9 @@ void loop() {
     Heat = false;
     loadEnable = false;
   }
-//  else{
-//    ErrorStatus = 0;
-//  }
+  //  else{
+  //    ErrorStatus = 0;
+  //  }
 
 
   //// возможные причины ошибки
@@ -304,45 +312,47 @@ void loop() {
   //#define ENDSTOP_FILAMENT 3
   //#define ENDSTOP_TAPE 4
 
-  if (curTemp > CFG_TEMP_MAX - 10) {
-    ErrorStatus = OVERHEAT;
-    runMotor = false;
-    motorCTL(-1);
-    Heat = false;
-    loadEnable = false;
-  }
-  if (curTemp < -10) {
-    ErrorStatus = THERMISTOR_ERROR;
-    runMotor = false;
-    motorCTL(-1);
-    Heat = false;
-    loadEnable = false;
+  if (tempenable > 3000) {
+    if (curTemp > CFG_TEMP_MAX - 10) {
+      ErrorStatus = OVERHEAT;
+      runMotor = false;
+      motorCTL(-1);
+      Heat = false;
+      loadEnable = false;
+    }
+    if (curTemp < -10) {
+      ErrorStatus = THERMISTOR_ERROR;
+      runMotor = false;
+      motorCTL(-1);
+      Heat = false;
+      loadEnable = false;
+    }
   }
 
-  #if defined(_externalLoad_)
-    if(loadEnable == false){
+#if defined(_externalLoad_)
+  if (loadEnable == false) {
     digitalWrite(externalLoadPin, LOW);
-    }else{
-     digitalWrite(externalLoadPin, HIGH); 
-    } 
-  #endif
+  } else {
+    digitalWrite(externalLoadPin, HIGH);
+  }
+#endif
 }
 
 //======================================
-void debugTemp(float temp, int out) {
-#if defined(SERIAL_DEBUG_TEMP)
-  static long debug_time;
-  if (debug_time < millis() ) {
-    debug_time = millis() + 200;
-    Serial.print(temp);
-#if defined(SERIAL_DEBUG_TEMP_PID)
-    Serial.print(' ');
-    Serial.print(out);
-#endif // end SERIAL_DEBUG_TEMP_PID
-    Serial.println(' ');
-  }
-#endif //end SERIAL_DEBUG_TEMP
-}
+//void debugTemp(float temp, int out) {
+//#if defined(SERIAL_DEBUG_TEMP)
+//  static long debug_time;
+//  if (debug_time < millis() ) {
+//    debug_time = millis() + 200;
+//    Serial.print(temp);
+//#if defined(SERIAL_DEBUG_TEMP_PID)
+//    Serial.print(' ');
+//    Serial.print(out);
+//#endif // end SERIAL_DEBUG_TEMP_PID
+//    Serial.println(' ');
+//  }
+//#endif //end SERIAL_DEBUG_TEMP
+//}
 
 long mmStoDeg(float mmS) {
   return mmS / (REDCONST * 1000);
@@ -453,6 +463,9 @@ boolean isInteractive() {
 }
 
 float getTemp() {
+
+
+
   uint8_t i;
   float average;
 
