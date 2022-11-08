@@ -10,6 +10,8 @@
 #define eeAddress_P 0
 #define eeAddress_I (eeAddress_P+sizeof(float))
 #define eeAddress_D (eeAddress_I+sizeof(float))
+#define eeAddress_minTemp (eeAddress_D+sizeof(float))
+#define eeAddress_maxTemp (eeAddress_minTemp+sizeof(int))
 
 
 #define DRIVER_STEP_TIME 6  // меняем задержку на 6 мкс
@@ -27,7 +29,7 @@ int value = 0;
 // Termistor definition
 float prevTemp, curTemp = 0;
 float targetTemp = CFG_TEMP_INIT;
-float finalLength = 0;
+//float finalLength = 0;
 
 
 
@@ -73,14 +75,12 @@ unsigned long interactive = millis();
 
 int ErrorStatus = 0; // Статус ошибки. Если 0 то это нормальная работа
 
-int motor_icon = 0; // Номер символа иконки вращения мотора
-
-#define ShowScreen_period 300  // период в мс
 uint32_t ssp;         // переменная таймера
 
 
 // Выбор экрана для вывода изображения (нужное раскоментировать)
 #include "LCD_1602_i2c.h" // Использование LCD 1602 I2C
+//#include "oled_I2C_128X64.h"
 
 int tempenable = 0; // костыль. Нужен для того чтобы фильтр термистора не ронял в ошибку пр истарте
 
@@ -97,15 +97,6 @@ void motorCTL(long setSpeedX10);
 //=====================================
 
 void setup() {
-
-#if defined(SERIAL_DEBUG_TEMP) || defined(SERIAL_DEBUG_STEPPER) || defined(SERIAL_DEBUG_TEMP_PID)
-  Serial.begin(9600);
-#endif //SERIAL_DEBUG_TEMP || SERIAL_DEBUG_STEPPER
-#if defined(SERIAL_DEBUG_STEPPER)
-  Serial.print("Gear ratio: ");
-  Serial.println(GEAR_RATIO);
-  Serial.println("[deg/s],\t[step/s],\t[deg],\t[mm/s],\t[deg/s],\t[deg]");
-#endif //SERIAL_DEBUG_STEPPER
 
 #if defined(__LGT8F__)
   analogReadResolution(10);
@@ -168,28 +159,23 @@ ISR(TIMER2_A) {
 // ======= !!!! =========
 void loop() {
   enc.tick();
-  stepper.tick();
+  stepper.tick(); // на всякий случай
 
   curTemp = getTemp();
   regulator.input = curTemp; // сообщаем регулятору текущую температуру
 
   if (millis() - ssp >= ShowScreen_period) {  // ищем разницу
-    ssp = millis();                   // сброс таймера
+    ssp = millis();  // сброс таймера
     showscreen(); // Вывод информации на экран
 
-    // анимация вращения мотора
-    motor_icon++;
-    if (motor_icon > 3) motor_icon = 0;
-
-    tempenable = tempenable + 1;
+    tempenable = tempenable + 1; // таймаут на настройку фильтра температуры
   }
 
-  if (tempenable > 4000) tempenable = 4000;
-
+  if (tempenable > 4000) tempenable = 4000; // защита от переполнение значения 
 
   long newTargetTemp = targetTemp;
   long newSpeedX10 = SpeedX10;
-  float rest;
+  //float rest;
 
 
   if (!isInteractive()) MenuMode = MENU_MODE_NO;
@@ -339,20 +325,6 @@ void loop() {
 }
 
 //======================================
-//void debugTemp(float temp, int out) {
-//#if defined(SERIAL_DEBUG_TEMP)
-//  static long debug_time;
-//  if (debug_time < millis() ) {
-//    debug_time = millis() + 200;
-//    Serial.print(temp);
-//#if defined(SERIAL_DEBUG_TEMP_PID)
-//    Serial.print(' ');
-//    Serial.print(out);
-//#endif // end SERIAL_DEBUG_TEMP_PID
-//    Serial.println(' ');
-//  }
-//#endif //end SERIAL_DEBUG_TEMP
-//}
 
 long mmStoDeg(float mmS) {
   return mmS / (REDCONST * 1000);
@@ -405,14 +377,6 @@ float getMilage() {
 }
 
 void motorCTL(long setSpeedX10) {
-#if defined(SERIAL_DEBUG_STEPPER)
-  Serial.print(stepper.getSpeedDeg());
-  Serial.print(",\t");
-  Serial.print(stepper.getSpeed());
-  Serial.print(",\t");
-  Serial.print(stepper.getCurrent());
-  Serial.print(",\t");
-#endif // SERIAL_DEBUG_STEPPER
   if (setSpeedX10 > 0) {
     stepper.setSpeedDeg(mmStoDeg((float)setSpeedX10 / 10), SMOOTH);      // [degree/sec]
   } else if (setSpeedX10 == 0) {
@@ -420,16 +384,6 @@ void motorCTL(long setSpeedX10) {
   } else {
     stepper.brake();
   }
-
-#if defined(SERIAL_DEBUG_STEPPER)
-  Serial.print((float)setSpeedX10 / 10);
-  Serial.print(",\t");
-  Serial.print(stepper.getSpeedDeg());
-  Serial.print(",\t");
-  Serial.print(stepper.getCurrent());
-  Serial.println(" ");
-#endif // SERIAL_DEBUG_STEPPER
-
 }
 
 

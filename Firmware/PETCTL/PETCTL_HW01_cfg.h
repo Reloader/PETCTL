@@ -110,14 +110,9 @@
 /* PETPull-2 Zneipas reductor variant (1:65.68(18) ratio)*/
 #define CFG_RED_PP2
 
-/* DON'T CHANGE ANYTHING AFTER THIS LINE IF YOU NOT SHURE TO 146% */
+/* === DON'T CHANGE ANYTHING AFTER THIS LINE IF YOU NOT SHURE TO 146% === */
 
-/* 
-  enable/disable serial debug output
-*/
-//#define SERIAL_DEBUG_TEMP 
-//#define SERIAL_DEBUG_TEMP_PID 
-//#define SERIAL_DEBUG_STEPPER
+
 
 /* Gear ratio for PETPull-2 Zneipas reductor variant */
 /* 

@@ -3,6 +3,9 @@
 // подключение экрана 1602 с i2c модулем
 #define _LCD_1602_adress_ 0x3F // адрес экрана на шине
 
+#define ShowScreen_period 300  // период обновления экрана в мс
+
+int motor_icon = 0; // Номер символа иконки вращения мотора
 
 #include "Wire.h"
 #include "src/LiquidCrystal_I2C.h"
@@ -41,6 +44,14 @@ void add_Symbols() {
   lcd.createChar(5, customChar5);
 
 
+}
+
+// Вызывается по таймеру на миллс и используется для генерации анимации
+void screen_logic(){
+
+  // анимация вращения мотора
+    motor_icon++;
+    if (motor_icon > 3) motor_icon = 0;
 }
 
 void screen_Init() {
@@ -115,6 +126,8 @@ void motorSymbol() {
 // displays all the information
 void showscreen() {
 
+  screen_logic(); // анимация
+
   // Блок обработки ошибок
   if (ErrorStatus == OVERHEAT ||  ErrorStatus == THERMISTOR_ERROR ) {
     lcd.clear();
@@ -122,14 +135,11 @@ void showscreen() {
     lcd.print("   -= ERROR =-");
     lcd.setCursor (0, 1);
 
-//    if (ErrorStatus == OVERHEAT) {
-//      lcd.print(" -= OVERHEAT =-");
-//    } else {
-//      lcd.print("THERMISTOR ERROR");
-//    }
-
-    lcd.print(curTemp, 0);
-
+    if (ErrorStatus == OVERHEAT) {
+      lcd.print(" -= OVERHEAT =-");
+    } else {
+      lcd.print("THERMISTOR ERROR");
+    }
 
   } else {
 
@@ -173,7 +183,7 @@ void showscreen() {
     if (targetTemp < 10) lcd.print(" ");
     if (targetTemp < 100) lcd.print(" ");
 
-    #if defined(_externalLoad_)
+#if defined(_externalLoad_)
     // управление нагрузкой
     // load management
     lcd.setCursor (12, 0);
@@ -183,7 +193,7 @@ void showscreen() {
     } else {
       lcd.print(" ");
     }
-    
+
     lcd.print(char(5));
     lcd.print(" ");
 
@@ -192,7 +202,7 @@ void showscreen() {
     } else {
       lcd.print(char(1));
     }
-    #endif
+#endif
 
     // индикация вращения мотора
     // motor rotation indication
@@ -205,7 +215,7 @@ void showscreen() {
         activeItem();
       }
     } else {
-      
+
       lcd.print(char(1));
     }
 
@@ -235,5 +245,5 @@ void showscreen() {
     }
     lcd.print(tmpMilage, 2);
     lcd.print("m");
-  }  
+  }
 }
