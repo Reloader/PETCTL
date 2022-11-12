@@ -2,9 +2,21 @@
 // 1) чтение/сохранение коэффициентов PID регулятора в EEPROM
 // 2) Встроить автокалибровку регулятора
 
+/*
+ *  === RELOADER ELECTRO ===
+ * Данная прошифка  - форк оригинальной прошивки PETCTL
+ * Оригинальный проект : 
+ * https://github.com/mvbasov/PETCTL
+ */
+
 #include <EEPROM.h>
 //#include "PETCTL_cfg.h"
 #include "PETCTL_HW02.h"
+
+#define _version_ "0.2"
+#define _developer_ "RELOADER ELECTRO"
+
+
 #define SPEED_MAX 15
 
 #define eeAddress_P 0
@@ -79,8 +91,8 @@ uint32_t ssp;         // переменная таймера
 
 
 // Выбор экрана для вывода изображения (нужное раскоментировать)
-#include "LCD_1602_i2c.h" // Использование LCD 1602 I2C
-//#include "oled_I2C_128X64.h"
+//#include "LCD_1602_i2c.h" // Использование LCD 1602 I2C
+#include "oled_I2C_128X64.h"
 
 int tempenable = 0; // костыль. Нужен для того чтобы фильтр термистора не ронял в ошибку пр истарте
 

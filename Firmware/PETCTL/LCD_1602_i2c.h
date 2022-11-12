@@ -63,9 +63,10 @@ void screen_Init() {
 void screen_logo() {
   lcd.clear();
   lcd.setCursor (0, 0);
-  lcd.print(" PETCTL V 0.11");
+  lcd.print(" PETCTL V ");
+  lcd.print(_version_);
   lcd.setCursor (0, 1);
-  lcd.print("RELOADER ELECTRO");
+  lcd.print(_developer_);
 }
 
 void screen_clear() {
