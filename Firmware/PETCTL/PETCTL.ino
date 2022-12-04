@@ -10,6 +10,8 @@
  */
 
 #include <EEPROM.h>
+
+// указание файла конфигурации железа
 //#include "PETCTL_cfg.h"
 #include "PETCTL_HW02.h"
 
@@ -150,9 +152,9 @@ void setup() {
   beepE();
 #endif
 
-  screen_logo();
-
-  delay(3000);
+  //screen_logo();
+  //delay(3000);
+  
   screen_clear();
 
   regulator.setLimits(0, 255);
