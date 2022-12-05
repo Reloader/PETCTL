@@ -42,6 +42,9 @@
 #define CFG_STEP_EN_PIN 10
 /* Invert stepper rotation direction (comment out to disable invertion)*/
 #define CFG_STEP_INVERT 
+
+
+//  === ENCODER ===
 /* Which pin encoder CLK pin connected */
 #define CFG_ENC_CLK 4
 /* Which pin encoder DT pin connected */
@@ -50,6 +53,8 @@
 #define CFG_ENC_SW 9
 /* Type of encoder: TYPE1 or TYPE2 */
 #define CFG_ENC_TYPE TYPE2
+
+
 /* Initial target temperature [degree C]*/
 #define CFG_TEMP_INIT 180
 /* Maximum allowed temperature [degree C], allowed to set to 10 degree less */

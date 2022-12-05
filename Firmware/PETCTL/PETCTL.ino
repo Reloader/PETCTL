@@ -12,8 +12,10 @@
 #include <EEPROM.h>
 
 // указание файла конфигурации железа
-//#include "PETCTL_cfg.h"
+//#include "PETCTL_HW01.h" // оригинальное железо PETCTL
 #include "PETCTL_HW02.h"
+
+
 
 #define _version_ "0.2"
 #define _developer_ "RELOADER ELECTRO"
