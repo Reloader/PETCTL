@@ -101,13 +101,15 @@ uint32_t ssp;         // переменная таймера
 
 // Выбор экрана для вывода изображения (нужное раскоментировать)
 //#include "LCD_1602_i2c.h" // Использование LCD 1602 I2C
-#include "oled_I2C_128X64.h"
+//#include "oled_I2C_128X64.h"
+#include "LCD5110_84x48.h"
 
 int tempenable = 0; // костыль. Нужен для того чтобы фильтр термистора не ронял в ошибку пр истарте
 
 
 // ==== Прототипы для компилятора =====
-void encRotationToValue (long* value, int inc = 1, long minValue = 0, long maxValue = 0);
+//void encRotationToValue (long* value, int inc = 1, long minValue = 0, long maxValue = 0);
+void encRotationToValue (long* value, int inc, long minValue, long maxValue);
 long mmStoDeg(float mmS);
 void beepE();
 float getTemp();
