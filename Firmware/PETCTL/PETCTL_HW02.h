@@ -32,71 +32,53 @@
  */
 //====================================================
 
-/*   Stepper driver microstep devision */
-#define CFG_STEP_DIV 16
-/* Which pin stepper driver STEP pin connected */
-#define CFG_STEP_STEP_PIN 2
-/* Which pin stepper driver DIR pin connected */
-#define CFG_STEP_DIR_PIN 3
-/* Which pin stepper driver EN pin connected */
-#define CFG_STEP_EN_PIN 10
-/* Invert stepper rotation direction (comment out to disable invertion)*/
-#define CFG_STEP_INVERT 
+// === STEPPER ===
+#define CFG_STEP_DIV 16       // Stepper driver microstep devision
+#define CFG_STEP_STEP_PIN 2   // Which pin stepper driver STEP pin connected
+#define CFG_STEP_DIR_PIN 3    // Which pin stepper driver DIR pin connected 
+#define CFG_STEP_EN_PIN 10    // Which pin stepper driver EN pin connected
+#define CFG_STEP_INVERT       // Invert stepper rotation direction (comment out to disable invertion)*
+
+// === BUZZER ===
+#define CFG_SOUND_PIN 13      // Buzzer pin connection
+#define CFG_SOUND_START       // Enable startup sound (comment to disable)  Special for GEORGIY (@nehilo011) :)
 
 
 //  === ENCODER ===
-/* Which pin encoder CLK pin connected */
-#define CFG_ENC_CLK 4
-/* Which pin encoder DT pin connected */
-#define CFG_ENC_DT 17
-/* Which pin encoder SW pin connected */
-#define CFG_ENC_SW 9
-/* Type of encoder: TYPE1 or TYPE2 */
-#define CFG_ENC_TYPE TYPE2
+#define CFG_ENC_CLK 4         // Which pin encoder CLK pin connected
+#define CFG_ENC_DT  11 // 17         // Which pin encoder DT pin connected
+#define CFG_ENC_SW 9          // Which pin encoder SW pin connected
+#define CFG_ENC_TYPE TYPE2    // Type of encoder: TYPE1 or TYPE2
 
+// === TERM ===
+#define CFG_HEATER_PIN 5      //Which pin heater MOSFET connected to
+#define CFG_TEMP_INIT 180     // Initial target temperature [degree C]
+#define CFG_TEMP_MAX 290      // Maximum allowed temperature [degree C], allowed to set to 10 degree less
+#define CFG_TEMP_MIN 120      // Minimum allowed temperature to set [degree C]
+#define CFG_TERM_PIN A0       // Which pin termistor connected to
+#define CFG_TERM_VALUE 100000 // Thermistor resistance at 25 degrees C [Om]
+#define CFG_TERM_VALUE_TEMP 25  // Thermistor temperature for nominal resistance (almost always 25 C) [degree C]
+#define CFG_TERM_B_COEFF 4388 // The beta coefficient of the thermistor (usually 3000-4000)
+#define CFG_TERM_SERIAL_R 10150   // the value of the 'other' resistor [Om]
 
-/* Initial target temperature [degree C]*/
-#define CFG_TEMP_INIT 180
-/* Maximum allowed temperature [degree C], allowed to set to 10 degree less */
-#define CFG_TEMP_MAX 290
-/* Minimum allowed temperature to set [degree C] */
-#define CFG_TEMP_MIN 120
-/* Which pin termistor connected to*/
-#define CFG_TERM_PIN A0
-/* Thermistor resistance at 25 degrees C [Om] */
-#define CFG_TERM_VALUE 100000
-/* Thermistor temperature for nominal resistance (almost always 25 C) [degree C] */
-#define CFG_TERM_VALUE_TEMP 25
-/* The beta coefficient of the thermistor (usually 3000-4000) */
-#define CFG_TERM_B_COEFF 4388
-/* the value of the 'other' resistor [Om] */
-#define CFG_TERM_SERIAL_R 10150
-/* Which pin endstop connected to  Датчик ленты*/ 
-//#define CFG_ENDSTOP_PIN 8
-#define CFG_ENDSTOP_PIN 21
-/* Extra length to pull after end stop triggered [m] */
-#define CFG_PULL_EXTRA_LENGTH 0.07
-/* Which pin emergency endstop connected to  Датчик прутка*/
-#define CFG_EMENDSTOP_PIN 7
 /* PID regulator coefficients */
-//PID p: 12.69  PID i: 0.71 PID d: 57.11
 #define CFG_PID_P 12.69
 #define CFG_PID_I 0.71
 #define CFG_PID_D 57.11
-/* Which pin heater MOSFET connected to */
-#define CFG_HEATER_PIN 5
-/* Target filament bobin diameter [mm] */
-#define CFG_BOBIN_DIAM 74
-/* Initial pull speed [mm/s] */
-#define CFG_SPEED_INIT 2.5
-/* Buzzer pin connection */
-#define CFG_SOUND_PIN 13
-/* Enable startup sound (comment to disable).
-   Special for GEORGIY (@nehilo011) :) */
-#define CFG_SOUND_START
 
-// пин дополнительной внешней нагрузки
-#define externalLoadPin 6
+// === ENDSTOP ===
+#define CFG_ENDSTOP_PIN 11          // Which pin endstop connected to  Датчик ленты
+#define CFG_PULL_EXTRA_LENGTH 0.07  // Extra length to pull after end stop triggered [m]
+#define CFG_EMENDSTOP_PIN 7         // Which pin emergency endstop connected to  Датчик прутка
+
+// === OTHRES ===
+#define CFG_BOBIN_DIAM 74           // Target filament bobin diameter [mm]
+#define CFG_SPEED_INIT 2.5          // Initial pull speed [mm/s]
+#define externalLoadPin 6           // External load pin /// пин дополнительной внешней нагрузки
+
+
+// === REDUCTOR ===
+
 /* 
  *  Chouse reductor type. 
  * Only one CFG_RED_RA, CFG_RED_PP1 or CFG_RED_PP2 can be uncomment
