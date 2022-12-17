@@ -2,6 +2,10 @@
 Для работы экрана необходимо подключить библиотеки :
 Adafruit_GFX
 Adafruit_PCD8544
+
+Работа с экраном напрямую
+https://count-zero.ru/2017/pcd8544/https://count-zero.ru/2017/pcd8544/
+
 */
 
 #define ShowScreen_period 300  // период обновления экрана в мс
@@ -43,6 +47,13 @@ void screen_clear() {
 }
 
 void showscreen() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(BLACK);
+  display.println("test");
+  display.display();
+  delay(2000);
+  
   
 
   
