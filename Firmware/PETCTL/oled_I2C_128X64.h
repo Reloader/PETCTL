@@ -59,9 +59,7 @@ void screen_logo() {
   oled.setCursor(20, 7);
   oled.print("mvb   V ");
   oled.print(_version_);
-#ifdef USE_SCREEN_BUFFER
   oled.update();
-#endif
 }
 
 

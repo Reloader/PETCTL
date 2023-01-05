@@ -1,11 +1,9 @@
 /*
+Конвертор изображений 
+http://javl.github.io/image2cpp/
 
-Работа с экраном напрямую
-https://count-zero.ru/2017/pcd8544/
-
-Перенести код библиотеки из статьи в файл 
-"src/pcd8544.h"
-
+Графический редактор
+https://www.photopea.com/
 
 
 */
@@ -15,95 +13,61 @@ https://count-zero.ru/2017/pcd8544/
 #define _contrast_ 0x25
 #define _bias_ 0x4
 
-#define PIN_SCE   A2
-#define PIN_RESET A1
-#define PIN_DC    A3
-#define PIN_SDIN  A4
-#define PIN_SCLK  A5
+#define _lcd_RST A1
+#define _lcd_CE A2
+#define _lcd_DC A3
+#define _lcd_DIN A4
+#define _lcd_CLK A5
 
-#define LCD_C     LOW
-#define LCD_D     HIGH
+#define line_spacing 12
+#define start_line 2
+#define str_1 start_line
+#define str_2 start_line + line_spacing
+#define str_3 start_line + (line_spacing*2)
+#define str_4 start_line + (line_spacing*3)
 
-#define LCD_X     84
-#define LCD_Y     48
+// #define str_1 0
+// #define str_2 12
+// #define str_3 24
+// #define str_4 36
 
-
-//#define _lcd_RST A1
-//#define _lcd_CE A2
-//#define _lcd_DC A3
-//#define _lcd_DIN A4
-//#define _lcd_CLK A5
 
 #include <SPI.h>
 #include <Wire.h>
-#include "src/pcd8544.h"
+//#include "src/pcd8544.h"
 
-//#include <Adafruit_GFX.h>
-//#include <Adafruit_PCD8544.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_PCD8544.h>
 
-//Adafruit_PCD8544 display = Adafruit_PCD8544(_lcd_CLK, _lcd_DIN, _lcd_DC, _lcd_CE, _lcd_RST);
+Adafruit_PCD8544 display = Adafruit_PCD8544(_lcd_CLK, _lcd_DIN, _lcd_DC, _lcd_CE, _lcd_RST);
+
+// 'ok_01', 8x8px
+const unsigned char epd_bitmap_ok_01 [] PROGMEM = {
+	0x00, 0x00, 0x02, 0x06, 0x8c, 0xd8, 0x70, 0x20
+};
+
+// 'degree_celsius', 4x4px
+const unsigned char epd_bitmap_degree_celsius [] PROGMEM = {
+	0x60, 0x90, 0x90, 0x60
+};
 
 
 
 
-
-void LcdWrite(byte dc, byte data)
-{
-  digitalWrite(PIN_DC, dc);
-  digitalWrite(PIN_SCE, LOW);
-  shiftOut(PIN_SDIN, PIN_SCLK, MSBFIRST, data);
-  digitalWrite(PIN_SCE, HIGH);
-}
-
-void LcdCharacter(char character)
-{
-  LcdWrite(LCD_D, 0x00);
-  for (int index = 0; index < 5; index++)
-  {
-    LcdWrite(LCD_D, ASCII[character - 0x20][index]);
-  }
-  LcdWrite(LCD_D, 0x00);
-}
-
-void LcdString(char *characters)
-{
-  while (*characters)
-  {
-    LcdCharacter(*characters++);
-  }
-}
 
 
 
 void screen_Init() {
-  //display.begin();
-  //display.setContrast(_contrast_);
-  //display.setBias(_bias_);
-  //display.display();
-  //display.clearDisplay();  // clears the screen and buffer
+  display.begin();
+  display.setContrast(_contrast_);
+  display.setBias(_bias_);
+  display.display();
+  display.clearDisplay();  // clears the screen and buffer
 
-  pinMode(PIN_SCE, OUTPUT);
-  pinMode(PIN_RESET, OUTPUT);
-  pinMode(PIN_DC, OUTPUT);
-  pinMode(PIN_SDIN, OUTPUT);
-  pinMode(PIN_SCLK, OUTPUT);
-  digitalWrite(PIN_RESET, LOW);
-  digitalWrite(PIN_RESET, HIGH);
-  LcdWrite(LCD_C, 0x21 );  // LCD Extended Commands.
-  //LcdWrite(LCD_C, 0xBA );  // Set LCD Vop (Contrast). Здесь константа в оригинале была B1 (c)flanker 
-  LcdWrite(LCD_C, _contrast_ );
-  LcdWrite(LCD_C, 0x04 );  // Set Temp coefficent. //0x04
-  //LcdWrite(LCD_C, 0x14 );  // LCD bias mode 1:48. //0x13
-  LcdWrite(LCD_C, _bias_ );
-  LcdWrite(LCD_C, 0x20 );  // LCD Basic Commands
-  LcdWrite(LCD_C, 0x0C );  // LCD in normal mode.
+  //pcd8544_Init();
 }
 
-void pcd8544_set_cursor(uint8_t x, uint8_t y) {
-    x=x%12; y=y%6;
-    pcd8544_send(LCD_C, 0x40+y);
-    pcd8544_send(LCD_C, 0x80+x*7);
-} 
+
 
 
 
@@ -112,12 +76,9 @@ void pcd8544_set_cursor(uint8_t x, uint8_t y) {
 
 
 void screen_clear() {
-  //display.clearDisplay();  // clears the screen and buffer
+  display.clearDisplay();  // clears the screen and buffer
 
-  for (int index = 0; index < LCD_X * LCD_Y / 8; index++)
-  {
-    LcdWrite(LCD_D, 0x00);
-  }
+ //pcd8544_clear();
 }
 
 void screen_logo() {
@@ -126,16 +87,73 @@ void screen_logo() {
 }
 
 void showscreen() {
-  //display.clearDisplay();
-  //display.setTextSize(1);
-  //display.setTextColor(BLACK);
-  //display.println("test");
-  //display.display();
+
+  curTemp = 232.345;
+  targetTemp = 250;
+  float tmpspeed = 11.4;
+  float tmpMilage = 10.324;
+
+
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(BLACK);
+
+  display.drawBitmap(0, str_1,  epd_bitmap_ok_01, 8, 8, BLACK); // OK температура
+  display.setCursor(9, str_1);
+  display.print(curTemp,1);
+  display.setCursor(60, str_1);
+  display.print(targetTemp,0);
+
+  display.drawBitmap(42, str_1,  epd_bitmap_degree_celsius, 4, 4, BLACK); // градус сельсия
+  display.setCursor(48, str_1);
+  display.print("C");
+
+  display.drawBitmap(0, str_2,  epd_bitmap_ok_01, 8, 8, BLACK); // OK температура
+  display.setCursor(9, str_2);
+  display.print(tmpspeed,1);
+
+  //display.setCursor(42, 9);
+  display.print(" mm/s");
+
+  // tmpMilage
+  display.setCursor(3, str_3);
+  display.print(tmpMilage,1);
+  display.print(" meters");
+
+  display.drawBitmap(0, str_4,  epd_bitmap_ok_01, 8, 8, BLACK); 
+  display.setCursor(9, str_4);
+  display.print("Ext. Load");
+
+
+
+
+
+
+  // oled.print(tmpspeed, 1);
+
+
+  //display.setTextColor(WHITE, BLACK);
+
+  //display.setCursor(8, 8);
+
+
   
+
+
+   
   
-  //LcdClear();
-  screen_clear();
-  LcdString("Hello World!");
+
+
+  // градус сельсия
+  // epd_bitmap_degree_celsius
+
+
+
+  display.display();
+
+  // 'lamp', 10x14px
+//const unsigned char epd_bitmap_lamp
   
   delay(2000);
 
